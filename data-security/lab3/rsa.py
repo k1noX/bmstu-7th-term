@@ -1,7 +1,8 @@
+# RSA
+
 import argparse
 import math
 import typing as _t
-
 
 RUSSIAN_ALPHABET = [
     'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й', 'к', 'л', 'м', 'н',

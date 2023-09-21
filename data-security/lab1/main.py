@@ -61,7 +61,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    key = load_key_from_file(args.path or "key.json")
+    key = load_key_from_file(args.path or "data/key.json")
     if args.decrypt:
         print("Расшифрованный текст:", decrypt(args.text, key))
     else:

@@ -87,7 +87,7 @@ def form_translate_dict(input: list, output: list):
 
 
 if __name__ == "__main__":
-    with open("input.txt", encoding="UTF8") as file:
+    with open("data/input.txt", encoding="UTF8") as file:
         input_text = file.read()
 
     input_freq = calculate_letter_frequency(input_text.lower())
@@ -95,7 +95,7 @@ if __name__ == "__main__":
     input_freq = {k: v for k, v in
         sorted(input_freq.items(), key=lambda item: item[1], reverse=True)}
 
-    with open("cypher.txt", encoding="UTF8") as file:
+    with open("data/cypher.txt", encoding="UTF8") as file:
         cypher_text = file.read()
 
     cypher_freq = calculate_letter_frequency(cypher_text.lower())
