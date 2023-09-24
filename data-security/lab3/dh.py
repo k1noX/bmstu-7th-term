@@ -27,3 +27,6 @@ if __name__ == "__main__":
 
     Xb = math.pow(a, Xa) % q
     print("Секретный ключ Xb:", Xb)
+
+    Kb = math.pow(Yb, Xa) % q
+    print("Общий ключ K:", Kb)
