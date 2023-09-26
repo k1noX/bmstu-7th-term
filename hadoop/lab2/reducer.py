@@ -6,7 +6,7 @@ import sys
 current_word = None
 current_locations = []
 word = None
-print("(", end="")
+print("(")
 for line in sys.stdin:
     regex = re.compile(r"\(\S+\s\(\d+(?:\s+\d+)*\)\)")
     matches = regex.findall(line)
@@ -29,5 +29,5 @@ for line in sys.stdin:
             current_locations = locations
             current_word = word
 if current_word == word:
-    print(f'({current_word} ({" ".join(current_locations)}))', end="")
+    print(f'({current_word} ({" ".join(current_locations)}))')
 print(")", end="")
