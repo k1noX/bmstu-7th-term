@@ -1,7 +1,8 @@
 import argparse
+from typing import Union
 
 
-def fast_pow(x, y):
+def fast_pow(x: int, y: int) -> Union[float, int]:
     if y == 0:
         return 1
     if y == -1:
@@ -13,11 +14,11 @@ def fast_pow(x, y):
     return p
 
 
-def encode(message, e, n):
+def encode(message: int, e: int, n: int) -> int:
     return fast_pow(message, e) % n
 
 
-def decode(message, d, n):
+def decode(message: int, d: int, n: int) -> int:
     return fast_pow(message, d) % n
 
 
