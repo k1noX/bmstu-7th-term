@@ -21,7 +21,7 @@ do
   /usr/local/hadoop/bin/mapred streaming -input "$OUTPUT.$((i-1))/part-00000" -output "$OUTPUT.$i" -mapper $MAPPER -reducer $REDUCER
 done
 
-echo "[SCRIPT] Starting Final MapReduce Job For $OUTPUT.$iteration..."
+echo "[SCRIPT] Starting Final MapReduce Job For $OUTPUT.$MAX_ITERATIONS..."
 /usr/local/hadoop/bin/hdfs dfs -rm -r -f "$OUTPUT"
 /usr/local/hadoop/bin/mapred streaming -D mapred.text.key.comparator.options=-nr -input "$OUTPUT.$MAX_ITERATIONS/part-00000" -output "$OUTPUT" -mapper $POST_MAPPER
 
