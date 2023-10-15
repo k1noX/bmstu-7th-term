@@ -1,77 +1,12 @@
 # Вариант 14
 from functools import reduce
+
+import matplotlib.lines
+import matplotlib.pyplot as plt
 import numpy as np
 
-import matplotlib.pyplot as plt
-import matplotlib.lines
-from matplotlib.animation import FuncAnimation
-
-
-class Animation:
-    def __init__(
-            self, xs, ys, line, points, min_label,
-            root_label, conditions
-    ):
-        self._xs = xs
-        self._ys = ys
-        self._line = line
-        self._points = points
-        self._min_label = min_label
-        self._root_label = root_label
-        self._previous_points = []
-        self._pause = False
-        self._previous_root = 20
-        self._conditions = conditions
-
-    def to_tuple(self) -> tuple:
-        return (
-            self._line,
-            self._points,
-            self._min_label,
-            self._root_label,
-        )
-
-    def get_frames(self):
-        MAX_ROOT = 50
-        STEP = 0.05
-        while self._previous_root < MAX_ROOT:
-            if not self._pause:
-                self._previous_root += STEP
-            yield self._previous_root
-
-    def on_click(self, event):
-        self._pause ^= True
-
-    def get_animation_frame(self, z: float) -> tuple:
-        y = (z - 4 * self._xs) / 6
-        self._line.set_data(self._xs, y)
-
-        regions = [condition(self._xs, y) for condition in conditions]
-        intersection = list(reduce(lambda _x, _y: _x & _y, regions))
-
-        points = {}
-        for i in range(len(self._xs)):
-            for j in range(len(y)):
-                if intersection[i][j]:
-                    points[self._xs[i][j]] = y[i][j]
-
-        if len(points.keys()) > 0 and len(self._previous_points) > 0:
-            x_min = list(points.keys())[0]
-            y_min = list(points.values())[0]
-            min_label.set_text(
-                f"min $z$ = $f({x_min:.2f}, {y_min:.2f})$ ="
-                f" {z:.2f}"
-            )
-            self._pause = True
-
-        points_tuple = ([*points.keys()], [*points.values()])
-        self._previous_points = points_tuple
-        self._points.set_data(*points_tuple)
-
-        return self.to_tuple()
-
-
 if __name__ == "__main__":
+
     conditions = [
         lambda x, y: 3 * x + y >= 9,
         lambda x, y: x + 2 * y >= 8,
@@ -83,64 +18,84 @@ if __name__ == "__main__":
         lambda x, y: x + 2 * y - 8,
         lambda x, y: x + 6 * y - 11
     ]
-    colors = [
-        "#ffa700B0",
-        "#0057e7B0",
-        "#008744B0"
+
+    explicit_equalities = [
+        lambda x: 9 - 3 * x,
+        lambda x: 4 - x / 2,
+        lambda x: (11 - x) / 6,
     ]
 
-    values = np.linspace(0, 7, 250)
-    xs, ys = np.meshgrid(values, values)
+    labels = [
+        '$3x_1 + x_2 = 9$',
+        '$x_1 + 2x_2 = 8$',
+        '$x_1 + 6x_2 = 11$'
+    ]
 
-    regions = [condition(xs, ys) for condition in conditions]
-    extent = (xs.min(), xs.max(), ys.min(), ys.max())
+    colors = [
+        "k-.",
+        "k--",
+        "k:"
+    ]
 
     figure, axis = plt.subplots()
 
-    for i in range(len(equalities)):
-        plt.contour(xs, ys, equalities[i](xs, ys), [0], colors=colors[i])
+    x = np.arange(0, 12, 0.01)
 
-    intersetion = np.array(reduce(lambda _x, _y: _x & _y, regions))
+    plan = (26 - 4 * x) / 6
+    plt.plot(x, plan, "r--", label=f'$z = 4x_1 + 6x_2 = 26$')
+    plan = (30.8 - 4 * x) / 6
+    plt.plot(x, plan, "r-.", label=f'$z = 4x_1 + 6x_2 = 30.8$')
+    plan = (44 - 4 * x) / 6
+    plt.plot(x, plan, "r-.", label=f'$z = 4x_1 + 6x_2 = 44$')
+
+    point_name = ord('A')
+    for i in range(len(explicit_equalities)):
+        previous_i = i - 1 if i != 0 else len(explicit_equalities) - 1
+        previous_f = explicit_equalities[previous_i](x)
+        f = explicit_equalities[i](x)
+        idx = np.argwhere(np.diff(np.sign(previous_f - f))).flatten()[0]
+        plt.plot(x, f, colors[i], label=labels[i])
+        plt.plot(x[idx], f[idx], 'ko')
+        axis.annotate(
+            f'{chr(point_name)} ({x[idx]:.1f}, {f[idx]:.1f})',
+            (x[idx] - 0.5, f[idx] + 0.3),
+            backgroundcolor='#ffffffB0'
+        )
+        point_name += 1
+
+    for i in range(len(explicit_equalities)):
+        if i != 2:
+            continue
+        f = explicit_equalities[i](x)
+        idx = np.argwhere(np.diff(np.sign(f))).flatten()[0]
+        plt.plot(x[idx], f[idx], 'ko')
+        axis.annotate(
+            f'{chr(point_name)} ({x[idx]:.1f}, {f[idx]:.1f})',
+            (x[idx] - 0.5, f[idx] + 0.3),
+            backgroundcolor='#ffffffB0'
+        )
+        point_name += 1
+
+    plt.axvline(2, color='b', linestyle='--', label='$x_1=2$')
+    plt.axvline(6.5, color='b', linestyle='-.', label='$x_1=6.5$')
+    plt.axvline(11, color='b', linestyle=':', label='$x_1=11$')
+    axis.set_ylim(0, 7)
+    axis.set_xlim(0, 12)
+
+    plt.xlabel("$x_1$")
+    plt.ylabel("$x_2$")
+
+    xs, ys = np.meshgrid(x, x)
+    regions = [condition(xs, ys) for condition in conditions]
+    intersection = np.array(reduce(lambda _x, _y: _x & _y, regions))
+    extent = (x.min(), x.max(), x.min(), x.max())
     plt.imshow(
-        intersetion.astype(int),
-        extent = extent,
-        origin = "lower",
-        cmap = "Reds",
-        alpha = 0.5
+        intersection.astype(int),
+        extent=extent,
+        origin="lower",
+        cmap="Greens",
+        alpha=0.25
     )
 
-    line = axis.plot([], [], "r")[0]
-    points = axis.plot([], [], "ro")[0]
-    min_label = axis.text(0.1, 0.3, "", fontsize=10)
-    max_label = axis.text(0.1, 0.1, "", fontsize=10)
-    root_label = axis.text(0.1, 0.5, "", fontsize=10)
-
-    animation = Animation(
-        xs, ys, line, points, min_label, root_label, conditions
-    )
-    ani = FuncAnimation(
-        figure,
-        animation.get_animation_frame,
-        frames = animation.get_frames,
-        init_func = animation.to_tuple,
-        blit = True,
-        interval = 10,
-    )
-    figure.canvas.mpl_connect('button_press_event', animation.on_click)
-
-    green_legend_handle = matplotlib.lines.Line2D(
-        [], [], color=colors[0], marker="s", ls="",
-        label="$x_1$ + $x_2$ <= 6"
-    )
-    blue_legend_handle = matplotlib.lines.Line2D(
-        [], [], color=colors[1], marker="s", ls="",
-        label="($x_1$ - 2)($x_2$ + 1) >= 4"
-    )
-    blue_legend_handle = matplotlib.lines.Line2D(
-        [], [], color=colors[2], marker="s", ls="",
-        label="($x_1$ - 2)($x_2$ + 1) >= 4"
-    )
-
-    plt.legend(handles=[green_legend_handle, blue_legend_handle])
-
+    plt.legend()
     plt.show()
